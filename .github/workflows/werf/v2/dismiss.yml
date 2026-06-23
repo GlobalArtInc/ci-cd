@@ -3,7 +3,7 @@
 #
 #   jobs:
 #     dismiss_stage:
-#       uses: ci-cd/templates/.github/workflows/werf-v2-dismiss.yml@master
+#       uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/dismiss.yml@master
 #       with:
 #         deploy_env: stage
 #       secrets: inherit

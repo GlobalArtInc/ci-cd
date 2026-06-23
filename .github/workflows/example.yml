@@ -1,14 +1,5 @@
-# Example usage in a project repository.
-# Place this file at .github/workflows/ci.yml
-#
-# GitLab equivalent:
-#   include:
-#     - project: 'ci-cd/templates'
-#       ref: master
-#       file: 'werf/v2/build.gitlab-ci.yml'
-#     - ...
-#
-# In GitHub this is done via uses: <org>/templates/.github/workflows/<file>@master
+# Example .github/workflows/ci.yml for a project repository
+# Replace PROJECT variable value with your actual project name
 
 name: CI/CD
 
@@ -16,37 +7,36 @@ on:
   push:
     branches: [master, stage]
 
-# Cancel in-progress runs on the same branch
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  PROJECT: core
 
 jobs:
   # ────────────────────────────── PROD ──────────────────────────────
   build_prod:
     if: github.ref_name == 'master'
-    uses: ci-cd/templates/.github/workflows/werf-v2-build.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/build.yml@master
     with:
       deploy_env: prod
-      harbor_project: gitlab-prod
     secrets: inherit
 
   lint_prod:
     needs: [build_prod]
     if: github.ref_name == 'master'
-    uses: ci-cd/templates/.github/workflows/werf-v2-lint.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/lint.yml@master
     with:
       deploy_env: prod
-      harbor_project: gitlab-prod
     secrets: inherit
 
   deploy_prod:
     needs: [build_prod]
     if: github.ref_name == 'master'
-    uses: ci-cd/templates/.github/workflows/werf-v2-deploy.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/deploy.yml@master
     with:
       deploy_env: prod
-      harbor_project: gitlab-prod
       environment_name: production/prod1
       environment_url: https://api.globalart.dev/swagger/
     secrets:
@@ -58,10 +48,9 @@ jobs:
   cleanup_prod:
     needs: [deploy_prod]
     if: github.ref_name == 'master'
-    uses: ci-cd/templates/.github/workflows/werf-v2-cleanup.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/cleanup.yml@master
     with:
       deploy_env: prod
-      harbor_project: gitlab-prod
     secrets:
       HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
       HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
@@ -71,29 +60,26 @@ jobs:
   # ────────────────────────────── STAGE ─────────────────────────────
   build_stage:
     if: github.ref_name == 'stage'
-    uses: ci-cd/templates/.github/workflows/werf-v2-build.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/build.yml@master
     with:
       deploy_env: stage
-      harbor_project: gitlab-stage
     secrets: inherit
 
   lint_stage:
     needs: [build_stage]
     if: github.ref_name == 'stage'
-    uses: ci-cd/templates/.github/workflows/werf-v2-lint.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/lint.yml@master
     with:
       deploy_env: stage
-      harbor_project: gitlab-stage
     secrets: inherit
 
   deploy_stage:
     needs: [build_stage]
     if: github.ref_name == 'stage'
     # Make deploy manual: enable "Required reviewers" on the staging environment in repository settings
-    uses: ci-cd/templates/.github/workflows/werf-v2-deploy.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/deploy.yml@master
     with:
       deploy_env: stage
-      harbor_project: gitlab-stage
       environment_name: staging
       environment_url: https://api.glbart.dev/swagger/
     secrets:
@@ -105,10 +91,9 @@ jobs:
   cleanup_stage:
     needs: [deploy_stage]
     if: github.ref_name == 'stage'
-    uses: ci-cd/templates/.github/workflows/werf-v2-cleanup.yml@master
+    uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/cleanup.yml@master
     with:
       deploy_env: stage
-      harbor_project: gitlab-stage
     secrets:
       HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
       HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}

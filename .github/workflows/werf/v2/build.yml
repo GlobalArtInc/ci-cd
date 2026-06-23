@@ -3,17 +3,15 @@
 #
 #   jobs:
 #     build_prod:
-#       uses: ci-cd/templates/.github/workflows/werf-v2-build.yml@master
+#       uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/build.yml@master
 #       with:
 #         deploy_env: prod
-#         harbor_project: gitlab-prod
 #       secrets: inherit
 #
 #     build_stage:
-#       uses: ci-cd/templates/.github/workflows/werf-v2-build.yml@master
+#       uses: GlobalArtInc/ci-cd/.github/workflows/werf/v2/build.yml@master
 #       with:
 #         deploy_env: stage
-#         harbor_project: gitlab-stage
 #       secrets: inherit
 
 on:
@@ -22,11 +20,7 @@ on:
       deploy_env:
         required: true
         type: string
-        description: "Target environment"
-      harbor_project:
-        required: true
-        type: string
-        description: "Harbor project"
+        description: "Target environment: prod or stage"
       repo_name:
         required: false
         type: string
@@ -64,12 +58,13 @@ jobs:
       - name: Build
         env:
           DEPLOY_ENV: ${{ inputs.deploy_env }}
-          HARBOR_PROJECT: ${{ inputs.harbor_project }}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
           WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
         run: |
+          HARBOR_PROJECT="$DEPLOY_ENV"
+
           REPO_NAME="${{ inputs.repo_name }}"
           if [[ -z "$REPO_NAME" ]]; then REPO_NAME="${GITHUB_REPOSITORY##*/}"; fi
 

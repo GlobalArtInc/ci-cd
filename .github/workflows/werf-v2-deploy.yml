@@ -77,7 +77,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted]
     environment:
       name: ${{ inputs.environment_name }}
       url: ${{ inputs.environment_url }}

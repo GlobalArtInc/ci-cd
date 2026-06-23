@@ -43,7 +43,7 @@ on:
 
 jobs:
   cleanup:
-    runs-on: self-hosted
+    runs-on: [self-hosted]
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4

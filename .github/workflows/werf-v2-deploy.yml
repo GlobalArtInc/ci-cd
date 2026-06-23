@@ -22,11 +22,11 @@ on:
   workflow_call:
     inputs:
       deploy_env:
-        required: true
+        required: false
         type: string
         description: "Target environment: prod or stage"
       environment_name:
-        required: true
+        required: false
         type: string
         description: "GitHub Environment name (e.g. production/prod1 or staging)"
       environment_url:
@@ -63,11 +63,11 @@ on:
 
     secrets:
       HARBOR_HOST:
-        required: true
+        required: false
       HARBOR_USERNAME:
-        required: true
+        required: false
       HARBOR_PASSWORD:
-        required: true
+        required: false
       WERF_SECRET_KEY:
         required: false
       KUBECTX_PROD1:

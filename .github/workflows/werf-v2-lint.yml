@@ -18,7 +18,7 @@ on:
   workflow_call:
     inputs:
       deploy_env:
-        required: true
+        required: false
         type: string
         description: "Target environment: prod or stage"
       repo_name:
@@ -47,11 +47,11 @@ on:
 
     secrets:
       HARBOR_HOST:
-        required: true
+        required: false
       HARBOR_USERNAME:
-        required: true
+        required: false
       HARBOR_PASSWORD:
-        required: true
+        required: false
       WERF_SECRET_KEY:
         required: false
 

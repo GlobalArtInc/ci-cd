@@ -20,7 +20,7 @@ on:
   workflow_call:
     inputs:
       deploy_env:
-        required: true
+        required: false
         type: string
         description: "Target environment: prod or stage"
       repo_name:
@@ -31,11 +31,11 @@ on:
 
     secrets:
       HARBOR_HOST:
-        required: true
+        required: false
       HARBOR_USERNAME:
-        required: true
+        required: false
       HARBOR_PASSWORD:
-        required: true
+        required: false
       KUBECTX_PROD1:
         required: false
       KUBECTX_STAGE1:

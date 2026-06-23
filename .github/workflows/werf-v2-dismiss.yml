@@ -6,7 +6,7 @@
 #       uses: GlobalArtInc/ci-cd/.github/workflows/werf-v2-dismiss.yml@master
 #       with:
 #         deploy_env: stage
-#       secrets: inherit
+#       secrets: inherit  # not needed — credentials passed via inputs
 
 on:
   workflow_call:
@@ -20,9 +20,10 @@ on:
         type: string
         default: ""
         description: "Suffix for werf.yaml"
-    secrets:
+
       KUBECTX:
         required: true
+        type: string
         description: "Base64-encoded kubeconfig (KUBECTX_PROD1 or KUBECTX_STAGE1)"
 
 jobs:
@@ -42,7 +43,7 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBECTX }}" | base64 -d > ~/.kube/config
+          echo "${{ inputs.KUBECTX }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
       - name: Dismiss release

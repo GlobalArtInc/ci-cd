@@ -8,7 +8,7 @@
 #         deploy_env: prod
 #         environment_name: production/prod1
 #         environment_url: https://api.globalart.dev/swagger/
-#       secrets: inherit  # not needed — credentials passed via inputs
+#       secrets: inherit
 #
 #     deploy_stage:
 #       uses: GlobalArtInc/ci-cd/.github/workflows/werf-v2-deploy.yml@master
@@ -16,7 +16,7 @@
 #         deploy_env: stage
 #         environment_name: staging
 #         environment_url: https://api.glbart.dev/swagger/
-#       secrets: inherit  # not needed — credentials passed via inputs
+#       secrets: inherit
 
 on:
   workflow_call:
@@ -55,22 +55,17 @@ on:
         default: ""
         description: "Suffix for werf.yaml"
 
+
+    secrets:
       HARBOR_HOST:
         required: true
-        type: string
-        description: "Harbor registry host"
       HARBOR_USERNAME:
         required: true
-        type: string
-        description: "Harbor registry username"
       HARBOR_PASSWORD:
         required: true
-        type: string
-        description: "Harbor registry password"
       KUBECTX:
         required: true
-        type: string
-        description: "Base64-encoded kubeconfig for the target cluster"
+        description: "Base64-encoded kubeconfig for the target cluster (KUBECTX_PROD1 or KUBECTX_STAGE1)"
 
 jobs:
   deploy:
@@ -92,15 +87,15 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ inputs.KUBECTX }}" | base64 -d > ~/.kube/config
+          echo "${{ secrets.KUBECTX }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
       - name: Deploy
         env:
           DEPLOY_ENV: ${{ inputs.deploy_env }}
-          HARBOR_HOST: ${{ inputs.HARBOR_HOST }}
-          HARBOR_USERNAME: ${{ inputs.HARBOR_USERNAME }}
-          HARBOR_PASSWORD: ${{ inputs.HARBOR_PASSWORD }}
+          HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
           WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
           NAMESPACE: ${{ inputs.namespace }}
           APPNAME: ${{ inputs.appname }}

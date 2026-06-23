@@ -6,13 +6,13 @@
 #       uses: GlobalArtInc/ci-cd/.github/workflows/werf-v2-build.yml@master
 #       with:
 #         deploy_env: prod
-#       secrets: inherit  # not needed — credentials passed via inputs
+#       secrets: inherit
 #
 #     build_stage:
 #       uses: GlobalArtInc/ci-cd/.github/workflows/werf-v2-build.yml@master
 #       with:
 #         deploy_env: stage
-#       secrets: inherit  # not needed — credentials passed via inputs
+#       secrets: inherit
 
 on:
   workflow_call:
@@ -35,18 +35,14 @@ on:
         default: ""
         description: "Suffix for werf.yaml (resulting file: werf<suffix>.yaml)"
 
+
+    secrets:
       HARBOR_HOST:
         required: true
-        type: string
-        description: "Harbor registry host"
       HARBOR_USERNAME:
         required: true
-        type: string
-        description: "Harbor registry username"
       HARBOR_PASSWORD:
         required: true
-        type: string
-        description: "Harbor registry password"
 
 jobs:
   build:
@@ -64,9 +60,9 @@ jobs:
       - name: Build
         env:
           DEPLOY_ENV: ${{ inputs.deploy_env }}
-          HARBOR_HOST: ${{ inputs.HARBOR_HOST }}
-          HARBOR_USERNAME: ${{ inputs.HARBOR_USERNAME }}
-          HARBOR_PASSWORD: ${{ inputs.HARBOR_PASSWORD }}
+          HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
           WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
         run: |
           HARBOR_PROJECT="$DEPLOY_ENV"

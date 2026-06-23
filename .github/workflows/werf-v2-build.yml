@@ -43,6 +43,8 @@ on:
         required: true
       HARBOR_PASSWORD:
         required: true
+      WERF_SECRET_KEY:
+        required: false
 
 jobs:
   build:
@@ -63,6 +65,7 @@ jobs:
           HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+          WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
           WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
         run: |
           HARBOR_PROJECT="$DEPLOY_ENV"

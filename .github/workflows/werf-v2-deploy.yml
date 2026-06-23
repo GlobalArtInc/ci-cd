@@ -63,6 +63,8 @@ on:
         required: true
       HARBOR_PASSWORD:
         required: true
+      WERF_SECRET_KEY:
+        required: false
       KUBECTX_PROD1:
         required: false
       KUBECTX_STAGE1:
@@ -99,6 +101,7 @@ jobs:
           HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+          WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
           WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
           NAMESPACE: ${{ inputs.namespace }}
           APPNAME: ${{ inputs.appname }}

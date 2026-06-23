@@ -1,0 +1,80 @@
+# Reusable workflow — equivalent of werf/v2/cleanup.gitlab-ci.yml
+# Usage in a project repository:
+#
+#   jobs:
+#     cleanup_prod:
+#       needs: [deploy_prod]
+#       uses: ci-cd/templates/.github/workflows/werf-v2-cleanup.yml@master
+#       with:
+#         deploy_env: prod
+#         harbor_project: gitlab-prod
+#       secrets: inherit
+#
+#     cleanup_stage:
+#       needs: [deploy_stage]
+#       uses: ci-cd/templates/.github/workflows/werf-v2-cleanup.yml@master
+#       with:
+#         deploy_env: stage
+#         harbor_project: gitlab-stage
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      deploy_env:
+        required: true
+        type: string
+        description: "Target environment"
+      harbor_project:
+        required: true
+        type: string
+        description: "Harbor project"
+      repo_name:
+        required: false
+        type: string
+        description: "Repository name in Harbor (defaults to the GitHub repository name)"
+    secrets:
+      HARBOR_HOST:
+        required: true
+      HARBOR_USERNAME:
+        required: true
+      HARBOR_PASSWORD:
+        required: true
+      KUBECTX:
+        required: true
+        description: "Base64-encoded kubeconfig (KUBECTX_PROD1 or KUBECTX_STAGE1)"
+
+jobs:
+  cleanup:
+    runs-on: [self-hosted, us-east-1-runner]
+    container:
+      image: registry.werf.io/werf/werf:2-stable
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECTX }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Cleanup registry
+        env:
+          DEPLOY_ENV: ${{ inputs.deploy_env }}
+          HARBOR_PROJECT: ${{ inputs.harbor_project }}
+          HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          REPO_NAME="${{ inputs.repo_name }}"
+          if [[ -z "$REPO_NAME" ]]; then REPO_NAME="${GITHUB_REPOSITORY##*/}"; fi
+
+          if [[ -f ./.helm/def.sh ]]; then source ./.helm/def.sh && $DEPLOY_ENV; fi
+
+          export WERF_REPO="$HARBOR_HOST/$HARBOR_PROJECT/$REPO_NAME"
+
+          werf cr login -u "$HARBOR_USERNAME" -p "$HARBOR_PASSWORD" "$HARBOR_HOST"
+          werf cleanup --repo "$WERF_REPO"

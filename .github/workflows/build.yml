@@ -1,0 +1,97 @@
+# Reusable workflow — equivalent of werf/v2/build.gitlab-ci.yml
+# Usage in a project repository:
+#
+#   jobs:
+#     build_prod:
+#       uses: ci-cd/templates/.github/workflows/werf-v2-build.yml@master
+#       with:
+#         deploy_env: prod
+#         harbor_project: gitlab-prod
+#       secrets: inherit
+#
+#     build_stage:
+#       uses: ci-cd/templates/.github/workflows/werf-v2-build.yml@master
+#       with:
+#         deploy_env: stage
+#         harbor_project: gitlab-stage
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      deploy_env:
+        required: true
+        type: string
+        description: "Target environment"
+      harbor_project:
+        required: true
+        type: string
+        description: "Harbor project"
+      repo_name:
+        required: false
+        type: string
+        description: "Repository name in Harbor (defaults to the GitHub repository name)"
+      custom_tag:
+        required: false
+        type: string
+        description: "Custom image tag (default: %image%-<run_id>)"
+      werf_config_name:
+        required: false
+        type: string
+        default: ""
+        description: "Suffix for werf.yaml (resulting file: werf<suffix>.yaml)"
+    secrets:
+      HARBOR_HOST:
+        required: true
+      HARBOR_USERNAME:
+        required: true
+      HARBOR_PASSWORD:
+        required: true
+
+jobs:
+  build:
+    runs-on: [self-hosted, us-east-1-runner]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup werf
+        uses: werf/actions/install@v2
+        with:
+          channel: ea
+
+      - name: Build
+        env:
+          DEPLOY_ENV: ${{ inputs.deploy_env }}
+          HARBOR_PROJECT: ${{ inputs.harbor_project }}
+          HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+          WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
+        run: |
+          REPO_NAME="${{ inputs.repo_name }}"
+          if [[ -z "$REPO_NAME" ]]; then REPO_NAME="${GITHUB_REPOSITORY##*/}"; fi
+
+          CUSTOM_TAG="${{ inputs.custom_tag }}"
+          if [[ -z "$CUSTOM_TAG" ]]; then CUSTOM_TAG="%image%-${GITHUB_RUN_ID}"; fi
+
+          if [[ -f ./.helm/def.sh ]]; then source ./.helm/def.sh && $DEPLOY_ENV; fi
+
+          export WERF_CONFIG="werf${WERF_CONFIG_NAME}.yaml"
+          export WERF_SYNCHRONIZATION=:local
+          export WERF_INSECURE_REGISTRY=true
+          export WERF_SKIP_TLS_VERIFY_REGISTRY=true
+          export WERF_PARALLEL=true
+          export WERF_PARALLEL_TASKS_LIMIT=10
+          export WERF_ADD_CUSTOM_TAG_COMMON="$CUSTOM_TAG"
+          export WERF_REPO="$HARBOR_HOST/$HARBOR_PROJECT/$REPO_NAME"
+          export WERF_REPO_CONTAINER_REGISTRY=harbor
+          export WERF_FINAL_REPO_HARBOR_PASSWORD="$HARBOR_USERNAME"
+          export WERF_FINAL_REPO_HARBOR_USERNAME="$HARBOR_PASSWORD"
+          export WERF_LOOSE_GITERMINISM=true
+          export ENVNAME="$DEPLOY_ENV"
+
+          werf cr login -u "$HARBOR_USERNAME" -p "$HARBOR_PASSWORD" "$HARBOR_HOST"
+          werf build
+          echo "repo -- $WERF_REPO"

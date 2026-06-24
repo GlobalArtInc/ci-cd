@@ -22,6 +22,8 @@ on:
         description: "Suffix for werf.yaml"
 
     secrets:
+      PROXY_URL:
+        required: false
       KUBECTX_PROD1:
         required: false
       KUBECTX_STAGE1:

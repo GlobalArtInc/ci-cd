@@ -53,6 +53,8 @@ on:
         required: false
       WERF_SECRET_KEY:
         required: false
+      PROXY_URL:
+        required: false
 
 jobs:
   lint:

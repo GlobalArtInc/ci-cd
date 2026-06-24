@@ -41,6 +41,8 @@ on:
         description: "Override .project value in werf.yaml (e.g. platform-front-admin)"
 
     secrets:
+      PROXY_URL:
+        required: false
       HARBOR_HOST:
         required: false
       HARBOR_USERNAME:

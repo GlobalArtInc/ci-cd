@@ -29,6 +29,8 @@ on:
         description: "Repository name in Harbor (defaults to the GitHub repository name)"
 
     secrets:
+      PROXY_URL:
+        required: false
       HARBOR_HOST:
         required: false
       HARBOR_USERNAME:

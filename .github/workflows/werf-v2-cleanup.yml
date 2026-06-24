@@ -28,7 +28,6 @@ on:
         type: string
         description: "Repository name in Harbor (defaults to the GitHub repository name)"
 
-
     secrets:
       HARBOR_HOST:
         required: false
@@ -65,6 +64,7 @@ jobs:
 
       - name: Cleanup registry
         env:
+          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
           DEPLOY_ENV: ${{ inputs.deploy_env }}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}

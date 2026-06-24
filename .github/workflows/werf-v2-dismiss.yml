@@ -51,7 +51,8 @@ jobs:
 
       - name: Dismiss release
         env:
-          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
+          HTTP_PROXY: ${{ secrets.PROXY_URL }}
+          HTTPS_PROXY: ${{ secrets.PROXY_URL }}
           DEPLOY_ENV: ${{ inputs.deploy_env }}
           WERF_CONFIG_NAME: ${{ inputs.werf_config_name }}
         run: |
